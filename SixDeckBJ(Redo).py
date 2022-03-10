@@ -26,14 +26,17 @@ class Dealer:
     
     def __init__(self):
         self.hand = []
-   
+        self.splitHolding = []
         
     def draw(self,deck):
         card = deck.draw()
         self.hand.append(card)   
+            
+    def splitHoldReset(self):
+        self.splitHolding.clear()  
         
     def display(self):
-        for c in self.hand:
+        for c in self.splitHolding:
             if (c.val == 1):
                 print("A", c.suit)
             elif (c.val == 11):
@@ -50,7 +53,11 @@ class Dealer:
             if (c.val == 1):
                 return True
         return False
+    def splitToHolding(self):
+        self.splitHolding.append(self.hand.pop(0))
     
+    def holdingDraw(self):
+        self.hand.append(self.splitHolding.pop(0))
     
     def getSuit(self):
         c = self.hand[len(self.hand)-1]
@@ -65,33 +72,10 @@ class Dealer:
     
     def flipCard(self):
         print("\nDealer flips over! ...")
-                                         
-                               
-                                         
-        c = self.hand[0]
-        if (c.val == 1):
-            print("A", c.suit)
-        elif (c.val == 11):
-            print("J", c.suit)
-        elif (c.val == 12):
-            print("Q", c.suit) 
-        elif (c.val == 13):
-            print("K", c.suit) 
-        else:
-            print(c.val, c.suit)
         
-        print("\nThe Dealers Cards are: ")
-        for c in self.hand:
-            if (c.val == 1):
-                print("A", c.suit)
-            elif (c.val == 11):
-                print("J", c.suit)
-            elif (c.val == 12):
-                print("Q", c.suit) 
-            elif (c.val == 13):
-                print("K", c.suit) 
-            else:
-                print(c.val, c.suit)
+    def splitHoldReset(self):
+        self.splitHolding.clear()                                   
+                               
                 
     def turnCard(self):
         for c in self.hand:
@@ -287,6 +271,7 @@ class Player1:
         self.hand = []
         self.splitHand1 = []
         self.splitHand2 = []
+        self.splitHolding = []
         self.chips = 0
         sum = 0 
    
@@ -307,10 +292,17 @@ class Player1:
     def chipCount(self):
         return self.chips
     
+    def splitToHolding(self):
+        self.splitHolding.append(self.hand.pop(1))
+    
+    def drawHolding(self):
+        self.hand.append(self.splitHolding.pop(0))
+        
     def splitHand(self):
         self.splitHand1.append(self.hand.pop(0))
         self.splitHand2.append(self.hand.pop(0))
-        
+    def splitHoldReset(self):
+        self.splitHolding.clear()     
     def getNumVal(self):
         c = self.hand[len(self.hand)-1]
         if(c.val == 10):
@@ -352,7 +344,7 @@ class Player1:
         return val
         
     def display(self):
-        for c in self.splitHand1:
+        for c in self.hand:
             if (c.val == 1):
                 print("A", c.suit)
             elif (c.val == 11):
@@ -659,7 +651,11 @@ class SixDeck:
         splitButton_List = []
         playAgainButton_List = []
         colorUpButton_List = []
+        nextSplitButton_List = []
+        splitResultsButton_List = []
+        seeDealerTurnButton_List = []
         
+        splitScores = []
         
         p1 = Player1()
         d = Dealer()
@@ -686,6 +682,12 @@ class SixDeck:
         
         global doubleBool
         doubleBool = False
+        
+        global splitBool 
+        splitBool = False
+        
+        def over21check(splitScores,val):
+            return(all(x > val for x in splitScores))
         
         def getCardString(s,v):
             if(v == 1):
@@ -716,6 +718,9 @@ class SixDeck:
             
         def deal():
             clearFrame()
+            globals()['splitBool'] = False
+            p1.splitHoldReset()
+            d.splitHoldReset()
             globals()['frameCount'] += 1
             frame_List[globals()['frameCount']].pack(padx = 1, pady = 1)
                       
@@ -779,13 +784,27 @@ class SixDeck:
             globals()['playerCardTracker'] += 100
             Label(frame_List[globals()['frameCount']], text = str(p1.score()),width = 7, font = ("Arial", 25)).place(x = 330, y = 680)  
             if(p1.score() > 21):
-                Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
-                hitButton_List[globals()['frameCount']].destroy()
-                standButton_List[globals()['frameCount']].destroy()
-                playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
-                colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
-                Label(frame_List[globals()['frameCount']], text = "Player Busted", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
-                Label(frame_List[globals()['frameCount']], text = "-" + str(globals()['betSize']), width = 6, fg = 'red', font = ("Arial", 25)).place(x = 150, y = 550)
+                if(len(p1.splitHolding) > 0):
+                    hitButton_List[globals()['frameCount']].destroy()
+                    standButton_List[globals()['frameCount']].destroy()
+                    nextSplitButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                    splitScores.append(p1.score())
+                elif(globals()['splitBool'] == True):
+                    splitScores.append(p1.score())
+                    hitButton_List[globals()['frameCount']].destroy()
+                    standButton_List[globals()['frameCount']].destroy()
+                    if(over21check(splitScores, 21)):
+                        splitResultsButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                    else:
+                        seeDealerTurnButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                else:
+                    Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
+                    hitButton_List[globals()['frameCount']].destroy()
+                    standButton_List[globals()['frameCount']].destroy()
+                    playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                    colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
+                    Label(frame_List[globals()['frameCount']], text = "Player Busted", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
+                    Label(frame_List[globals()['frameCount']], text = "-" + str(globals()['betSize']), width = 6, fg = 'red', font = ("Arial", 25)).place(x = 150, y = 550)
 
         def dealersTurn():
             Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
@@ -834,8 +853,70 @@ class SixDeck:
                 dealersTurn()
                 
         def split():
-            print('hi')
-        
+            p1.loseChips(globals()['betSize'] )
+            globals()['splitBool']=True
+            d.splitToHolding()
+            d.splitToHolding()
+            p1.splitToHolding()
+            globals()['playerCardTracker'] = 100
+            p1.draw(deck)
+            getCardString(p1.getSuit(),p1.getVal())
+            Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['playerCardTracker'], y = 500)
+            globals()['imageCount'] += 1
+            globals()['playerCardTracker'] += 100
+            Label(frame_List[globals()['frameCount']], text = str(p1.score()),width = 7, font = ("Arial", 25)).place(x = 330, y = 680)  
+            Label(frame_List[globals()['frameCount']], width = 15, text = "Split Hand 1", font = ("Arial", 22)).place(x = 280, y = 850)
+            
+            
+        def splitDeal():
+            clearFrame()
+            globals()['frameCount'] += 1
+            frame_List[globals()['frameCount']].pack(padx = 1, pady = 1)
+            p1.reset()
+            globals()['playerCardTracker'] = 0
+            globals()['dealerCardTracker'] = 0
+            
+            d.display()
+            
+            p1.drawHolding()
+            getCardString(p1.getSuit(),p1.getVal())
+            Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['playerCardTracker'], y = 500)
+            globals()['imageCount'] += 1
+            globals()['playerCardTracker'] += 100
+            
+            d.holdingDraw()
+            getCardString(d.getSuit(),d.getVal())
+            globals()['downCardIndex'] = globals()['imageCount']
+            Label(frame_List[globals()['frameCount']], image = imbc).place(x = 300 + globals()['dealerCardTracker'] , y = 100)
+            globals()['dealerCardTracker'] += 100
+            globals()['imageCount'] += 1
+            
+            p1.draw(deck)
+            getCardString(p1.getSuit(),p1.getVal())
+            Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['playerCardTracker'], y = 500)
+            globals()['imageCount'] += 1
+            globals()['playerCardTracker'] += 100
+            
+            d.holdingDraw()
+            getCardString(d.getSuit(),d.getVal())
+            Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['dealerCardTracker'] , y = 100)
+            globals()['dealerCardTracker'] += 100
+            globals()['imageCount'] += 1
+            
+            Label(frame_List[globals()['frameCount']], text = str(p1.score()),width = 7, font = ("Arial", 25)).place(x = 330, y = 680)  
+              
+            hitButton_List[globals()['frameCount']].place(x = 300, y = 400)
+            standButton_List[globals()['frameCount']].place(x = 375, y = 400)
+            doubleButton_List[globals()['frameCount']].place(x = 450, y = 400)
+            splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
+            
+            Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
+            Label(frame_List[globals()['frameCount']], width = 18, text = "Split Hand Continued", font = ("Arial", 22)).place(x = 280, y = 850)
+            playerBJCheck()
+            dealerBJCheck()
+    
+            
+            
         def playerBJCheck():
             if(p1.score() == 21):
                 hitButton_List[globals()['frameCount']].destroy()
@@ -872,6 +953,9 @@ class SixDeck:
                 Label(frame_List[globals()['frameCount']], text = "Dealer Wins", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
                 Label(frame_List[globals()['frameCount']], text = "-" + str(globals()['betSize']), width = 6, fg = 'red', font = ("Arial", 25)).place(x = 150, y = 550)
                 
+        def splitResults():
+            print('hi')
+            
         for i in range (0,200):
             frame_List.append(LabelFrame(root, width = 2000, height = 2000,background = 'darkgray'))
             hitButton_List.append(Button(frame_List[i],text="Hit",command = hit, height = 2, width = 5, background ='salmon', font = ("Arial", 15)))
@@ -880,7 +964,9 @@ class SixDeck:
             splitButton_List.append(Button(frame_List[i], text = "Split", command = split, height = 2, width = 5, background = 'gold',font = ("Arial", 15)))
             playAgainButton_List.append(Button(frame_List[i], text = "Play Again", command = deal, height = 2, width = 8, background = 'aqua', font =("Arial", 15)))
             colorUpButton_List.append(Button(frame_List[i], text = "Color Up", command = clearFrame, width = 8, height = 2, background = 'coral', font =("Arial", 15))) 
-                           
+            nextSplitButton_List.append(Button(frame_List[i], text = "See Next Split", command = splitDeal, width = 15, height = 2, background = 'khaki', font = ("Arial", 15))) 
+            splitResultsButton_List.append(Button(frame_List[i], text = "See Split Results", command = splitResults, width = 15, height = 2, background = 'khaki', font = ("Arial", 15)))
+            seeDealerTurnButton_List.append(Button(frame_List[i], text = "See Dealers Turn", command = dealersTurn, width = 15, height = 2, background = 'khaki', font = ("Arial", 15)))
         frame_List[0].pack()
         Button(frame_List[0], text = "Play BlackJack", command = start, height = 10, width = 25,background = 'salmon',font = ("Arial",25)).place(x=700,y=100)
         buyInEntry = Entry(frame_List[0], font = ("Arial", 15))
