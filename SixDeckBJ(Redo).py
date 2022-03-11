@@ -655,6 +655,8 @@ class SixDeck:
         nextSplitButton_List = []
         splitResultsButton_List = []
         seeDealerTurnButton_List = []
+        plus3Vals = []
+        plus3Suits = []
         
         splitScores = []
         splitDoubles = []
@@ -674,6 +676,9 @@ class SixDeck:
         global betSize 
         betSize = 0 
         
+        global plus3bet
+        plus3bet = 0
+        
         global playerCardTracker 
         playerCardTracker =0
         
@@ -691,6 +696,18 @@ class SixDeck:
         
         def over21check(splitScores,val):
             return(all(x > val for x in splitScores))
+        
+        def plus3Straight(v,s):
+            v.sort()
+            for i in range (0,len(v)-1):
+                if((v[i] + 1) == v[i+1]):
+                    straight = True
+                else:
+                    return False
+            return True
+        
+        def plus3Flush(s):
+            return all(x == s[0] for x in s)
         
         def getCardString(s,v):
             if(v == 1):
@@ -717,10 +734,16 @@ class SixDeck:
         def start():
             p1.addChips(float(buyInEntry.get()))
             globals()['betSize'] = float(betEntry.get())
+            if(len(plus3Entry.get()) == 0):
+                globals()['plus3bet'] = 0
+            else:
+                globals()['plus3bet'] = float(plus3Entry.get())
+                
             deal()
             
         def deal():
-                
+            plus3Vals.clear()
+            plus3Suits.clear()           
             clearFrame()
             splitScores.clear()
             splitDoubles.clear()
@@ -746,6 +769,8 @@ class SixDeck:
             
             p1.draw(deck)
             getCardString(p1.getSuit(),p1.getVal())
+            plus3Vals.append(p1.getVal())
+            plus3Suits.append(p1.getSuit())
             Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['playerCardTracker'], y = 500)
             globals()['imageCount'] += 1
             globals()['playerCardTracker'] += 100
@@ -759,12 +784,16 @@ class SixDeck:
            
             p1.draw(deck)
             getCardString(p1.getSuit(),p1.getVal())
+            plus3Vals.append(p1.getVal())
+            plus3Suits.append(p1.getSuit())
             Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['playerCardTracker'], y = 500)
             globals()['imageCount'] += 1
             globals()['playerCardTracker'] += 100
 
             d.draw(deck)    
             getCardString(d.getSuit(),d.getVal())
+            plus3Vals.append(d.getVal())
+            plus3Suits.append(d.getSuit())
             Label(frame_List[globals()['frameCount']], image = image_List[imageCount]).place(x = 300 + globals()['dealerCardTracker'] , y = 100)
             globals()['dealerCardTracker'] += 100
             globals()['imageCount'] += 1
@@ -779,8 +808,26 @@ class SixDeck:
             if(p1.splitCheck() == True):
                 splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
             
-            Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
 
+            
+            Label(frame_List[globals()['frameCount']],width = 15, text = "Plus 3 Bet", font = ("Arial",22)).place(x = 700, y = 200)
+            print(plus3Suits)
+            print('flush', plus3Flush(plus3Suits))
+            if(plus3Straight(plus3Vals,plus3Suits) == True or plus3Flush(plus3Suits) == True or plus3Flush(plus3Vals) == True):
+                win = str(globals()['plus3bet'] * 9)
+                p1.addChips(globals()['plus3bet'] * 9)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 750, y = 250)
+            else:
+                p1.loseChips(globals()['plus3bet'])
+                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 750, y = 250)
+            
+            Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
+            
+            plus3Straight(plus3Vals,plus3Suits)
+            plus3Flush(plus3Suits)
+            plus3Flush(plus3Vals)
+
+            
             playerBJCheck()
             dealerBJCheck()
     
