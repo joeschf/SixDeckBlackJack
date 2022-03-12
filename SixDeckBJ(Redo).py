@@ -643,7 +643,11 @@ class SixDeck:
     
     def sixDeckGame():
         root = tk.Tk() 
-         
+        
+        #3 of a kind suited 270 to 1 
+        #straight flush 180 to 1
+        #3 of a kind 90 to 1 
+        
         frame_List = []
         image_List = []
         hitButton_List = []
@@ -659,6 +663,7 @@ class SixDeck:
         plus3Suits = []
         changeBet_List = []
         changePlus3_List = []
+        changeTop3_List = []
         
         splitScores = []
         splitDoubles = []
@@ -680,7 +685,8 @@ class SixDeck:
         
         global plus3bet
         plus3bet = 0
-        
+        global top3bet
+        plus3bet = 0
         global playerCardTracker 
         playerCardTracker =0
         
@@ -742,7 +748,10 @@ class SixDeck:
                 globals()['plus3bet'] = 0
             else:
                 globals()['plus3bet'] = float(plus3Entry.get())
-                
+            if(len(top3Entry.get()) == 0):
+                globals()['top3bet'] = 0
+            else:
+                globals()['top3bet'] = float(plus3Entry.get())  
             deal()
             
         def deal():
@@ -818,16 +827,38 @@ class SixDeck:
                 splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
     
             Label(frame_List[globals()['frameCount']],width = 15, text = "Plus 3 Bet", font = ("Arial",22)).place(x = 700, y = 370)
+            Label(frame_List[globals()['frameCount']],width = 4, text = str(globals()['plus3bet']), font = ("Arial",22)).place(x = 750, y = 310)
+            
+            Label(frame_List[globals()['frameCount']],width = 15, text = "Top 3 Bet", font = ("Arial",22)).place(x = 700, y = 570)
+            Label(frame_List[globals()['frameCount']],width = 4, text = str(globals()['top3bet']), font = ("Arial",22)).place(x = 750, y = 510)
+
             if(plus3Straight(plus3Vals,plus3Suits) == True or plus3Flush(plus3Suits) == True or plus3Flush(plus3Vals) == True):
                 win = str(globals()['plus3bet'] * 9)
                 p1.addChips(globals()['plus3bet'] * 9)
-                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 750, y = 310)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 310)
             else:
                 p1.loseChips(globals()['plus3bet'])
-                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 750, y = 310)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 840, y = 310)
             
+            if(plus3Flush(plus3Vals) == True and plus3Flush(plus3Suits)):
+                win = str(globals()['top3bet'] * 270)
+                p1.addChips(globals()['top3bet'] * 270)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+            elif(plus3Straight(plus3Vals,plus3Suits) == True and plus3Flush(plus3Suits)):
+                win = str(globals()['top3bet'] * 180)
+                p1.addChips(globals()['top3bet'] * 180)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+            elif(plus3Flush(plus3Vals)):
+                win = str(globals()['top3bet'] * 180)
+                p1.addChips(globals()['top3bet'] * 180)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+            else:
+                p1.loseChips(globals()['plus3bet'])
+                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['top3bet']), font = ("Arial",22),fg = 'red').place(x = 840, y = 510)
+                
             Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
             Label(frame_List[globals()['frameCount']], image = idpc).place(x=700, y = 310)
+            Label(frame_List[globals()['frameCount']], image = idpc).place(x=700, y = 510)
             Label(frame_List[globals()['frameCount']], image = idpc).place(x=50, y = 400)
             Label(frame_List[globals()['frameCount']], text = str(globals()['betSize']),width = 7, font = ("Arial", 20)).place(x = 100, y =400)  
 
@@ -868,6 +899,8 @@ class SixDeck:
                     Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
                     Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
                     Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
+                    changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
+                    Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
                     hitButton_List[globals()['frameCount']].destroy()
                     standButton_List[globals()['frameCount']].destroy()
                     playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
@@ -901,6 +934,12 @@ class SixDeck:
                         hitButton_List[globals()['frameCount']].destroy()
                         standButton_List[globals()['frameCount']].destroy()
                         splitButton_List[globals()['frameCount']].destroy()
+                        Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
+                        Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
+                        changeBet_List[globals()['frameCount']].place(x = 300, y = 325)
+                        changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
+                        changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
+                        Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
                         playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
                         colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
                         p1.addChips(globals()['betSize']*2)
@@ -1050,7 +1089,7 @@ class SixDeck:
                     playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
                     colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
                     p1.addChips(globals()['betSize']*2.5)
-                    Label(frame_List[globals()['frameCount']], text = "+" + str(globals()['betSize']*2.5), width = 6, fg = 'green', font = ("Arial", 25)).place(x = 150, y = 550)
+                    Label(frame_List[globals()['frameCount']], text = "+" + str(globals()['betSize']*1.5), width = 6, fg = 'green', font = ("Arial", 25)).place(x = 150, y = 550)
                 
         def dealerBJCheck():
             if(d.score() == 21):
@@ -1074,6 +1113,8 @@ class SixDeck:
             changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
+            changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
+            Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
             if(p1.score() > d.score()):
                 p1.addChips(globals()['betSize']*2)
                 Label(frame_List[globals()['frameCount']], text = "Player Wins", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
@@ -1099,6 +1140,8 @@ class SixDeck:
             changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
+            changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
+            Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
             moneyCount = 0
             lossCount = 0
             winCount = 0 
@@ -1180,6 +1223,7 @@ class SixDeck:
             seeDealerTurnButton_List.append(Button(frame_List[i], text = "See Dealers Turn", command = dealersTurn, width = 15, height = 2, background = 'khaki', font = ("Arial", 15)))
             changeBet_List.append(Entry(frame_List[i], font = ("Arial", 15)))
             changePlus3_List.append(Entry(frame_List[i],font = ("Arial", 15)))
+            changeTop3_List.append(Entry(frame_List[i], font = ("Arial", 15)))
             
         frame_List[0].pack()
         Button(frame_List[0], text = "Play BlackJack", command = start, height = 10, width = 25,background = 'salmon',font = ("Arial",25)).place(x=700,y=100)
@@ -1189,13 +1233,16 @@ class SixDeck:
         betLabel = Label(frame_List[0], font =("Arial", 15), text ="Intial Bet Size $: ")
         plus3Entry = Entry(frame_List[0], font = ("Arial", 15))
         plus3Label = Label(frame_List[0], font =("Arial", 15), text ="Plus 3 Bet Size $: ")
+        top3Entry = Entry(frame_List[0], font = ("Arial",15))
+        top3Label = Label(frame_List[0], font = ("Arial", 15), text = "Top 3 Bet Size$: ")
         buyInLabel.place(x=700, y = 550)
         buyInEntry.place(x = 870, y = 550)
         betLabel.place(x=700, y = 650)
         betEntry.place(x = 870, y = 650)
         plus3Label.place(x=700, y = 750)
         plus3Entry.place(x = 870, y = 750)
-        
+        top3Entry.place(x=870, y = 850)
+        top3Label.place(x=700, y = 850)
         bc = Image.open('blue.png')
         dbc = bc.resize((95,145), Image.ANTIALIAS)
         imbc = ImageTk.PhotoImage(dbc)
