@@ -657,6 +657,8 @@ class SixDeck:
         seeDealerTurnButton_List = []
         plus3Vals = []
         plus3Suits = []
+        changeBet_List = []
+        changePlus3_List = []
         
         splitScores = []
         splitDoubles = []
@@ -693,6 +695,8 @@ class SixDeck:
         
         global splitBool 
         splitBool = False
+        
+        
         
         def over21check(splitScores,val):
             return(all(x > val for x in splitScores))
@@ -742,12 +746,17 @@ class SixDeck:
             deal()
             
         def deal():
+            if(len(changeBet_List[globals()['frameCount']].get()) > 0):
+                globals()['betSize'] = float(changeBet_List[globals()['frameCount']].get())
+            if(len(changePlus3_List[globals()['frameCount']].get()) > 0):
+                globals()['plus3bet'] = float(changePlus3_List[globals()['frameCount']].get())
             plus3Vals.clear()
             plus3Suits.clear()           
             clearFrame()
             splitScores.clear()
             splitDoubles.clear()
             splitBJ.clear()
+            
             
             p1.splitHoldReset()
             d.splitHoldReset()
@@ -760,6 +769,7 @@ class SixDeck:
             if(globals()['doubleBool'] == True):
                 globals()['betSize'] = globals()['betSize']/2
                 globals()['doubleBool'] = False
+                
             globals()['splitBool'] = False
                 
             p1.loseChips(globals()['betSize'])
@@ -798,7 +808,6 @@ class SixDeck:
             globals()['dealerCardTracker'] += 100
             globals()['imageCount'] += 1
             
-
             Label(frame_List[globals()['frameCount']], text = str(p1.score()),width = 7, font = ("Arial", 25)).place(x = 330, y = 680)  
               
             hitButton_List[globals()['frameCount']].place(x = 300, y = 400)
@@ -807,22 +816,21 @@ class SixDeck:
             
             if(p1.splitCheck() == True):
                 splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
-            
-
-            
-            Label(frame_List[globals()['frameCount']],width = 15, text = "Plus 3 Bet", font = ("Arial",22)).place(x = 700, y = 200)
-            print(plus3Suits)
-            print('flush', plus3Flush(plus3Suits))
+    
+            Label(frame_List[globals()['frameCount']],width = 15, text = "Plus 3 Bet", font = ("Arial",22)).place(x = 700, y = 370)
             if(plus3Straight(plus3Vals,plus3Suits) == True or plus3Flush(plus3Suits) == True or plus3Flush(plus3Vals) == True):
                 win = str(globals()['plus3bet'] * 9)
                 p1.addChips(globals()['plus3bet'] * 9)
-                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 750, y = 250)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 750, y = 310)
             else:
                 p1.loseChips(globals()['plus3bet'])
-                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 750, y = 250)
+                Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 750, y = 310)
             
             Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
-            
+            Label(frame_List[globals()['frameCount']], image = idpc).place(x=700, y = 310)
+            Label(frame_List[globals()['frameCount']], image = idpc).place(x=50, y = 400)
+            Label(frame_List[globals()['frameCount']], text = str(globals()['betSize']),width = 7, font = ("Arial", 20)).place(x = 100, y =400)  
+
             plus3Straight(plus3Vals,plus3Suits)
             plus3Flush(plus3Suits)
             plus3Flush(plus3Vals)
@@ -855,6 +863,10 @@ class SixDeck:
                     else:
                         seeDealerTurnButton_List[globals()['frameCount']].place(x = 300, y = 400)
                 else:
+                    changeBet_List[globals()['frameCount']].place(x = 300, y = 325)
+                    changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
+                    Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
+                    Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
                     Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
                     hitButton_List[globals()['frameCount']].destroy()
                     standButton_List[globals()['frameCount']].destroy()
@@ -888,6 +900,7 @@ class SixDeck:
                     else:
                         hitButton_List[globals()['frameCount']].destroy()
                         standButton_List[globals()['frameCount']].destroy()
+                        splitButton_List[globals()['frameCount']].destroy()
                         playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
                         colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
                         p1.addChips(globals()['betSize']*2)
@@ -1053,9 +1066,14 @@ class SixDeck:
         
         def checkWin():
             hitButton_List[globals()['frameCount']].destroy()
+            splitButton_List[globals()['frameCount']].destroy()
             standButton_List[globals()['frameCount']].destroy()
             playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
             colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
+            changeBet_List[globals()['frameCount']].place(x = 300, y = 325)
+            changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
+            Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
+            Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
             if(p1.score() > d.score()):
                 p1.addChips(globals()['betSize']*2)
                 Label(frame_List[globals()['frameCount']], text = "Player Wins", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
@@ -1077,6 +1095,10 @@ class SixDeck:
             playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
             colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
             Label(frame_List[globals()['frameCount']], width = 18, text = "Split Hand Results", font = ("Arial", 22)).place(x = 280, y = 850)
+            changeBet_List[globals()['frameCount']].place(x = 300, y = 325)
+            changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
+            Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
+            Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
             moneyCount = 0
             lossCount = 0
             winCount = 0 
@@ -1156,6 +1178,8 @@ class SixDeck:
             nextSplitButton_List.append(Button(frame_List[i], text = "See Next Split", command = splitDeal, width = 15, height = 2, background = 'khaki', font = ("Arial", 15))) 
             splitResultsButton_List.append(Button(frame_List[i], text = "See Split Results", command = splitResults, width = 15, height = 2, background = 'cyan', font = ("Arial", 15)))
             seeDealerTurnButton_List.append(Button(frame_List[i], text = "See Dealers Turn", command = dealersTurn, width = 15, height = 2, background = 'khaki', font = ("Arial", 15)))
+            changeBet_List.append(Entry(frame_List[i], font = ("Arial", 15)))
+            changePlus3_List.append(Entry(frame_List[i],font = ("Arial", 15)))
             
         frame_List[0].pack()
         Button(frame_List[0], text = "Play BlackJack", command = start, height = 10, width = 25,background = 'salmon',font = ("Arial",25)).place(x=700,y=100)
@@ -1176,6 +1200,9 @@ class SixDeck:
         dbc = bc.resize((95,145), Image.ANTIALIAS)
         imbc = ImageTk.PhotoImage(dbc)
         
+        pc = Image.open('pokerchip.png')
+        dpc = pc.resize((40, 40), Image.ANTIALIAS)
+        idpc = ImageTk.PhotoImage(dpc)
         
         root.mainloop()
 
