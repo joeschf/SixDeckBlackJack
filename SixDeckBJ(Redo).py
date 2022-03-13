@@ -607,7 +607,15 @@ class Player1:
             else:
                 s = "diamonds_king.png"   
         return s   
-    
+
+class ValueTooSmallError(Exception):
+    pass
+class SideBetTooSmall(Exception):
+    pass
+class bettoobig(Exception):
+    pass
+class sumtoobig(Exception):
+    pass
 class SixDeck:
     def __init__(self):
         self.cards = []
@@ -664,6 +672,8 @@ class SixDeck:
         changeBet_List = []
         changePlus3_List = []
         changeTop3_List = []
+        rebuy_List = []
+        rebuyButton_List = []
         
         splitScores = []
         splitDoubles = []
@@ -741,7 +751,122 @@ class SixDeck:
                 widgets.destroy()
             frame_List[globals()['frameCount']].destroy()
         
+        def betExceptions():
+            try:
+                entry = float(buyInEntry.get())
+                betEntry2 = float(betEntry.get())
+                if(len(plus3Entry.get())==0):
+                    plus3 = 0
+                else:
+                    plus3 = float(plus3Entry.get())
+                if(len(top3Entry.get()) == 0):
+                    top3 = 0
+                else:
+                    top3 = float(top3Entry.get())
+                if(entry <= 0 or betEntry2 <=0):
+                    print('hi')
+                    raise ValueTooSmallError 
+                elif(plus3 <0 or top3 <0):
+                    raise SideBetTooSmall
+                elif(entry <betEntry2 or entry < plus3 or entry < top3):
+                    raise bettoobig
+                elif(entry < betEntry2 + plus3 + top3):
+                    raise sumtoobig
+                else:
+                    return False            
+            except ValueError:
+                Label(frame_List[0], text = "Buy In and Bet Size must be a number greater than 0",font=("Arial", 15)).place(x=220, y = 550)
+                return True
+            except ValueTooSmallError:
+                Label(frame_List[0], text = "Buy In and Bet Size must be a number greater than 0",font=("Arial", 15)).place(x=220, y = 550)
+                return True
+            except SideBetTooSmall:
+                Label(frame_List[0], text = "Side Bets can be 0 or greater than",font=("Arial", 15)).place(x=220, y = 650)
+                return True
+            except bettoobig:
+                Label(frame_List[0], text = "Bets cannot be greater than buy in",font=("Arial", 15)).place(x=220, y = 700)
+                return True
+            except sumtoobig:
+                Label(frame_List[0], text = " Sum of Bets cannot be greater than buy in",font=("Arial", 15)).place(x=220, y = 750)
+                return True
+            
+        def rebuy():
+            try:
+                rebuy = float(rebuy_List[globals()['frameCount']].get())
+                changebet = float(changeBet_List[globals()['frameCount']].get())
+                
+                if(len(float(changePlus3_List[globals()['frameCount']].get()))==0):
+                    changePlus = 0
+                else:
+                    changePlus = float(changePlus3_List[globals()['frameCount']].get())
+                if(len(float(changeTop3_List[globals()['frameCount']].get())) == 0):
+                    changeTop = 0
+                else:
+                    changeTop = float(changeTop3_List[globals()['frameCount']].get())
+                if(changebet <= 0 or rebuy <=0):
+                    raise ValueTooSmallError 
+                elif(changePlus <0 or changeTop <0):
+                    raise SideBetTooSmall
+                elif(p1.chipCount() < (changebet + changePlus + changeTop)):
+                    raise bettoobig
+                else:
+                    return False         
+            
+            except ValueError:
+                Label(frame_List[globals()['frameCount']], text = "Must Enter Rebuy Amount",font=("Arial", 15)).place(x=1250, y = 50)
+                return True
+            except ValueTooSmallError:
+                Label(frame_List[globals()['frameCount']], text = "Buy In and bet must be a number greater than 0",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            except SideBetTooSmall:
+                Label(frame_List[globals()['frameCount']], text = "Side Bets can be 0 or greater than",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            except bettoobig:
+                Label(frame_List[globals()['frameCount']], text = "Bets cannot exceed chipcount",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            deal()
+        def checkRebet():
+            try:
+                changebet = float(changeBet_List[globals()['frameCount']].get())
+                
+                if(len(float(changePlus3_List[globals()['frameCount']].get()))==0):
+                    changePlus = 0
+                else:
+                    changePlus = float(changePlus3_List[globals()['frameCount']].get())
+                if(len(float(changeTop3_List[globals()['frameCount']].get())) == 0):
+                    changeTop = 0
+                else:
+                    changeTop = float(changeTop3_List[globals()['frameCount']].get())
+                if(changebet <= 0):
+                    raise ValueTooSmallError 
+                elif(changePlus <0 or changeTop <0):
+                    raise SideBetTooSmall
+                elif(p1.chipCount() < (changebet + changePlus + changeTop)):
+                    raise bettoobig
+                else:
+                    return False         
+        
+            except ValueError:
+                Label(frame_List[globals()['frameCount']], text = "Must Enter Bet less than Chip Count",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            except ValueTooSmallError:
+                Label(frame_List[globals()['frameCount']], text = "Bet Size must be a number greater than 0",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            except SideBetTooSmall:
+                Label(frame_List[globals()['frameCount']], text = "Side Bets can be 0 or greater than",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            except bettoobig:
+                Label(frame_List[globals()['frameCount']], text = "Bets cannot exceed chipcount",font=("Arial", 15)).place(x=450, y = 50)
+                return True
+            
         def start():
+            
+            errorCheck = True
+            while(errorCheck == True):
+                errorCheck = betExceptions()
+                if(errorCheck == True):
+                    return 
+                
             p1.addChips(float(buyInEntry.get()))
             globals()['betSize'] = float(betEntry.get())
             if(len(plus3Entry.get()) == 0):
@@ -836,6 +961,13 @@ class SixDeck:
                 win = str(globals()['plus3bet'] * 9)
                 p1.addChips(globals()['plus3bet'] * 9)
                 Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 310)
+                if(plus3Straight(plus3Vals,plus3Suits) == True):
+                    Label(frame_List[globals()['frameCount']],width = 10, text = "Straight!" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 310)
+                elif(plus3Flush(plus3Suits) == True):
+                    Label(frame_List[globals()['frameCount']],width = 10, text = "Flush!" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 310)
+                else:
+                    Label(frame_List[globals()['frameCount']],width = 10, text = "3 of a Kind" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 310)
+
             else:
                 p1.loseChips(globals()['plus3bet'])
                 Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['plus3bet']), font = ("Arial",22),fg = 'red').place(x = 840, y = 310)
@@ -844,14 +976,20 @@ class SixDeck:
                 win = str(globals()['top3bet'] * 270)
                 p1.addChips(globals()['top3bet'] * 270)
                 Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+                Label(frame_List[globals()['frameCount']],width = 10, text = "3 of a Kind Suited!!!" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 510)
+
             elif(plus3Straight(plus3Vals,plus3Suits) == True and plus3Flush(plus3Suits)):
                 win = str(globals()['top3bet'] * 180)
                 p1.addChips(globals()['top3bet'] * 180)
                 Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+                Label(frame_List[globals()['frameCount']],width = 10, text = "Straight Flush!!" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 510)
+
             elif(plus3Flush(plus3Vals)):
                 win = str(globals()['top3bet'] * 180)
                 p1.addChips(globals()['top3bet'] * 180)
                 Label(frame_List[globals()['frameCount']],width = 7, text = "+" + win, font = ("Arial",22),fg = 'Green').place(x = 840, y = 510)
+                Label(frame_List[globals()['frameCount']],width = 10, text = "3 of a kind!" + win, font = ("Arial",25),fg = 'Green').place(x = 1040, y = 510)
+
             else:
                 p1.loseChips(globals()['plus3bet'])
                 Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['top3bet']), font = ("Arial",22),fg = 'red').place(x = 840, y = 510)
@@ -899,8 +1037,8 @@ class SixDeck:
                     Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
                     Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
                     Label(frame_List[globals()['frameCount']], image = image_List[globals()['downCardIndex']]).place(x = 300, y = 100)
-                    changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
-                    Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
+                    changeTop3_List[globals()['frameCount']].place(x = 820, y = 640)
+                    Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 625, y = 640)
                     hitButton_List[globals()['frameCount']].destroy()
                     standButton_List[globals()['frameCount']].destroy()
                     playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
@@ -938,8 +1076,8 @@ class SixDeck:
                         Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
                         changeBet_List[globals()['frameCount']].place(x = 300, y = 325)
                         changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
-                        changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
-                        Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
+                        changeTop3_List[globals()['frameCount']].place(x = 820, y = 640)
+                        Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 625, y = 640)
                         playAgainButton_List[globals()['frameCount']].place(x = 300, y = 400)
                         colorUpButton_List[globals()['frameCount']].place(x = 420, y = 400)
                         p1.addChips(globals()['betSize']*2)
@@ -1113,8 +1251,8 @@ class SixDeck:
             changePlus3_List[globals()['frameCount']].place(x = 780, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Plus3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 440)
             Label(frame_List[globals()['frameCount']], text = "Change Bet", width = 10, font = ("Arial",15)).place(x=175,y=325)
-            changeTop3_List[globals()['frameCount']].place(x = 780, y = 640)
-            Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 585, y = 640)
+            changeTop3_List[globals()['frameCount']].place(x = 820, y = 640)
+            Label(frame_List[globals()['frameCount']], text = "Change Top3 Bet", width = 16, font = ("Arial", 15)).place(x = 625, y = 640)
             if(p1.score() > d.score()):
                 p1.addChips(globals()['betSize']*2)
                 Label(frame_List[globals()['frameCount']], text = "Player Wins", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
@@ -1126,6 +1264,26 @@ class SixDeck:
             else:
                 Label(frame_List[globals()['frameCount']], text = "Dealer Wins", width = 12, font = ("Arial", 25)).place(x = 330, y = 680)
                 Label(frame_List[globals()['frameCount']], text = "-" + str(globals()['betSize']), width = 6, fg = 'red', font = ("Arial", 25)).place(x = 150, y = 550)
+            if(p1.chipCount() == 0):  
+                playAgainButton_List[globals()['frameCount']].destroy()
+                rebuyButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                errorCheck = True
+                while(errorCheck == True):
+                    errorCheck = checkRebet()
+                    if(errorCheck == True):
+                        return 
+                
+                
+            elif(p1.chipCount() < (globals()['betSize']+globals()['top3bet'] +globals()['plus3bet'])):
+                rebuy_List[globals()['frameCount']].place(x = 1225, y = 450)
+                Label(frame_List[globals()['frameCount']], text = "Enter Rebuy Chips", width = 15, font = ("Arial", 24)).place(x = 1225, y = 400)
+                playAgainButton_List[globals()['frameCount']].destroy()
+                rebuyButton_List[globals()['frameCount']].place(x = 300, y = 400)
+                errorCheck = True
+                while(errorCheck == True):
+                    errorCheck = rebuy()
+                    if(errorCheck == True):
+                        return 
                 
         def splitResults():
 
@@ -1224,6 +1382,9 @@ class SixDeck:
             changeBet_List.append(Entry(frame_List[i], font = ("Arial", 15)))
             changePlus3_List.append(Entry(frame_List[i],font = ("Arial", 15)))
             changeTop3_List.append(Entry(frame_List[i], font = ("Arial", 15)))
+            rebuy_List.append(Entry(frame_List[i],font = ("Arial", 15)))
+            rebuyButton_List.append(Button(frame_List[i], text = "Rebuy Chips", command = rebuy, height = 2, width = 9, background = 'gold', font = ("Arial", 15)))
+            
             
         frame_List[0].pack()
         Button(frame_List[0], text = "Play BlackJack", command = start, height = 10, width = 25,background = 'salmon',font = ("Arial",25)).place(x=700,y=100)
