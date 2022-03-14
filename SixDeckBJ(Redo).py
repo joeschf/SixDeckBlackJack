@@ -648,7 +648,12 @@ class SixDeck:
         for c in self.cards:
             count +=1 
         return count
-    
+    def length(self):
+        return len(self.cards)
+    def deckReset(self):
+        self.cards = []
+        self.build()
+        
     def sixDeckGame():
         root = tk.Tk() 
          
@@ -671,7 +676,7 @@ class SixDeck:
         changeTop3_List = []
         rebuy_List = []
         rebuyButton_List = []
-        
+        reshuffleDeck_List =[]
         splitScores = []
         splitDoubles = []
         splitBJ = []
@@ -710,7 +715,11 @@ class SixDeck:
         splitBool = False
         
         
-        
+        def reShuffle():
+            deck.deckReset()
+            deck.shuffle()
+            deal()
+            
         def over21check(splitScores,val):
             return(all(x > val for x in splitScores))
         
@@ -849,6 +858,7 @@ class SixDeck:
             deal()
             
         def deal():
+
             if(len(changeBet_List[globals()['frameCount']].get()) > 0):
                 globals()['betSize'] = float(changeBet_List[globals()['frameCount']].get())
             if(len(changePlus3_List[globals()['frameCount']].get()) > 0):
@@ -860,12 +870,15 @@ class SixDeck:
             splitDoubles.clear()
             splitBJ.clear()
             
+
             
             p1.splitHoldReset()
             d.splitHoldReset()
             globals()['frameCount'] += 1
             frame_List[globals()['frameCount']].pack(padx = 1, pady = 1)
-                      
+            if(deck.length() < 210):
+                reshuffleDeck_List[globals()['frameCount']].place(x = 800, y = 400)
+                return          
             p1.reset()
             d.reset()
             
@@ -917,11 +930,6 @@ class SixDeck:
             hitButton_List[globals()['frameCount']].place(x = 300, y = 400)
             standButton_List[globals()['frameCount']].place(x = 375, y = 400)
             
-            if(globals()['betSize'] <= p1.chipCount()):
-                doubleButton_List[globals()['frameCount']].place(x = 450, y = 400)
-            
-            if(p1.splitCheck() == True and globals()['betSize'] <= p1.chipCount()):
-                splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
     
             Label(frame_List[globals()['frameCount']],width = 15, text = "Plus 3 Bet", font = ("Arial",22)).place(x = 700, y = 370)
             Label(frame_List[globals()['frameCount']],width = 4, text = str(globals()['plus3bet']), font = ("Arial",22)).place(x = 750, y = 310)
@@ -965,6 +973,12 @@ class SixDeck:
             else:
                 p1.loseChips(globals()['top3bet'])
                 Label(frame_List[globals()['frameCount']],width = 7, text = "-" + str(globals()['top3bet']), font = ("Arial",22),fg = 'red').place(x = 840, y = 510)
+            
+            if(globals()['betSize'] <= p1.chipCount()):
+                doubleButton_List[globals()['frameCount']].place(x = 450, y = 400)
+            
+            if(p1.splitCheck() == True and globals()['betSize'] <= p1.chipCount()):
+                splitButton_List[globals()['frameCount']].place(x = 525, y = 400)
                 
             Label(frame_List[globals()['frameCount']], width = 15, text = "Chips $" + str(p1.chipCount()), font = ("Arial", 22)).place(x = 280, y = 750)
             Label(frame_List[globals()['frameCount']], image = idpc).place(x=700, y = 310)
@@ -1426,6 +1440,7 @@ class SixDeck:
             changeTop3_List.append(Entry(frame_List[i], font = ("Arial", 15)))
             rebuy_List.append(Entry(frame_List[i],font = ("Arial", 15)))
             rebuyButton_List.append(Button(frame_List[i], text = "Rebuy Chips", command = rebuyCheck, height = 2, width = 10, background = 'gold', font = ("Arial", 15)))
+            reshuffleDeck_List.append(Button(frame_List[i], text = " Shoot Over Reshuffle Deck", command = reShuffle, height = 10, width = 24, background = 'aqua', font = ("Arial",19)))
             
             
         frame_List[0].pack()
