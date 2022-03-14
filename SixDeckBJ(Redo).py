@@ -876,7 +876,7 @@ class SixDeck:
             d.splitHoldReset()
             globals()['frameCount'] += 1
             frame_List[globals()['frameCount']].pack(padx = 1, pady = 1)
-            if(deck.length() < 210):
+            if(deck.length() < 20):
                 reshuffleDeck_List[globals()['frameCount']].place(x = 800, y = 400)
                 return          
             p1.reset()
